@@ -1156,6 +1156,165 @@ void Image2D::filtrageAuto_histogramme(int delta, std::string color){
 
   }
 }
+void Image2D::CornerDetection(){
+    if(option == "grey"){
+  double** Ux = new double* [nbX];
+  double** Uy = new double* [nbX];
+  double** Uxx = new double* [nbX];
+  double** Uyx = new double* [nbX];
+  double** Uxy = new double* [nbX];
+  double** Uyy = new double* [nbX];
+  for (int k=0; k<nbX ; k++){
+    Ux[k] = new double[nbY];
+    Uy[k] = new double[nbY];
+    Uxx[k] = new double[nbY];
+    Uyx[k] = new double[nbY];
+    Uxy[k] = new double[nbY];
+    Uyy[k] = new double[nbY];
+  }
+
+  for(int i=0;i<nbX-1;i++){
+      for(int j=0;j<nbY-1;j++){
+        Ux[i][j]=ptrGrey[i][j]-ptrGrey[i+1][j];
+        Uy[i][j]=ptrGrey[i][j]-ptrGrey[i][j+1];
+        Uxx[i][j] = Ux[i][j]* Ux[i][j];
+        Uyx[i][j] = Uy[i][j]* Ux[i][j];
+        Uxy[i][j] = Ux[i][j]* Uy[i][j];
+        Uyy[i][j] = Uy[i][j]* Uy[i][j];
+      }
+  }
+
+  double Kernel[10][10];
+  int taille = 2;
+  Kernel[0][0]=0;
+  Kernel[0][1]=0;
+  Kernel[0][2]=-1;
+  Kernel[0][3]=0;
+  Kernel[0][4]=0;
+
+  Kernel[1][0]=0;
+  Kernel[1][1]=-1;
+  Kernel[1][2]=-2;
+  Kernel[1][3]=-1;
+  Kernel[1][4]=0;
+
+  Kernel[2][0]=-1;
+  Kernel[2][1]=-2;
+  Kernel[2][2]=16;
+  Kernel[2][3]=-2;
+  Kernel[2][4]=-1;
+
+  Kernel[3][0]=0;
+  Kernel[3][1]=-1;
+  Kernel[3][2]=-2;
+  Kernel[3][3]=-1;
+  Kernel[3][4]=0;
+
+  Kernel[4][0]=0;
+  Kernel[4][1]=0;
+  Kernel[4][2]=-1;
+  Kernel[4][3]=0;
+  Kernel[4][4]=0;
+  /*taille = 1;
+  Kernel[0][0]=-1;
+  Kernel[0][1]=-1;
+  Kernel[0][2]=-1;
+  Kernel[1][0]=-1;
+  Kernel[1][1]=8;
+  Kernel[1][2]=-1;
+  Kernel[2][0]=-1;
+  Kernel[2][1]=-1;
+  Kernel[2][2]=-1;
+  Laplacien
+  */
+
+  double** J11 = new double* [nbX];
+    for (int k=0; k<nbX ; k++){
+    J11[k] = new double[nbY];
+    }
+  double** J22 = new double* [nbX];
+    for (int k=0; k<nbX ; k++){
+    J22[k] = new double[nbY];
+  }
+  double** J12 = new double* [nbX];
+    for (int k=0; k<nbX ; k++){
+    J12[k] = new double[nbY];
+    }
+
+  for(int i = 0; i<nbX;i++){
+    for(int j=0;j<nbY;j++){
+            if(i<taille || j<taille || i>=nbX-taille || j>=nbY-taille){
+                J11[i][j] = 255;
+                J22[i][j] = 255;
+                J12[i][j] = 255;
+            }
+            else{
+                for(int n = 0;n<taille*2+1;n++){
+                    for(int m=0;m<taille*2+1;m++){
+                        J11[i][j] += (Kernel[m][n])*(Uxx[i-taille+m][j-taille+n]);
+                        J22[i][j] += (Kernel[m][n])*(Uyy[i-taille+m][j-taille+n]);
+                        J12[i][j] += (Kernel[m][n])*(Uyx[i-taille+m][j-taille+n]);
+                    }
+                }
+            }
+    }
+  }
+
+  /*for(int i=0;i<nbX;i++){
+    for(int j=0;j<nbY;j++){
+        J11[i][j]=J11[i][j];
+        J22[i][j]=J22[i][j];
+        J12[i][j]=J12[i][j];
+        if(J11[i][j]>255){
+          J11[i][j]=255;
+        }
+        if(J22[i][j]>255){
+          J22[i][j]=255;
+        }
+        if(J12[i][j]>255){
+          J12[i][j]=255;
+        }
+        if(J11[i][j]<0){
+          J11[i][j]=0;
+        }
+        if(J22[i][j]<0){
+          J22[i][j]=0;
+        }
+        if(J12[i][j]<0){
+          J12[i][j]=0;
+        }
+    }
+  }*/
+
+  double** H = new double* [nbX];
+    for (int k=0; k<nbX ; k++){
+    H[k] = new double[nbY];
+    }
+
+  for(int i=0;i<nbX;i++){
+      for(int j=0;j<nbY;j++){
+        H[i][j] = ((J11[i][j] * J22[i][j]) - (J12[i][j] * J12[i][j])) - 0.04 * (J11[i][j] + J22[i][j]);
+        //std::cout << H[i][j]<< "\n";
+        //std::cout << J11[i][j]<< "\n";
+        //std::cout << J22[i][j]<< "\n";
+        //std::cout << J12[i][j]<< "\n";
+        if(H[i][j]>10000000){
+          for(int b = -5;b<6;b++){
+            if(i+b<nbX && i+b>0){
+              ptrGrey[i+b][j] = 255;
+            }
+          }
+          for(int c = -5;c<6;c++){
+            if(i+c<nbY && i+c>0){
+              ptrGrey[i][j+c] = 255;
+            }
+          }
+        }
+      }
+  }
+
+  }
+}
 
 /*void Image2D::EM_histogramme(int delta, std::string color){
   if(option == "grey"){

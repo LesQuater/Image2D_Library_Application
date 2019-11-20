@@ -32,6 +32,7 @@ class Fenetre : public Gtk::Window {
         void RealMask();
         void FiltrageAuto();
         void RealFiltrageAuto();
+        void Harris();
         void Histo();
         void Info();
         void Autor();
@@ -71,6 +72,10 @@ class Fenetre : public Gtk::Window {
         Gtk::ImageMenuItem menuConv;
         Gtk::ImageMenuItem menuMask;
         Gtk::ImageMenuItem menuFiltrageAuto;
+
+        Gtk::MenuItem menuItemDetection;
+        Gtk::Menu menuDetection;
+        Gtk::ImageMenuItem menuHarris;
 
         Gtk::MenuItem menuItemInfo;
         Gtk::Menu menuInfo;

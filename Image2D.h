@@ -54,6 +54,7 @@ class Image2D
         void Grey_to_RGB();
 
         void saltAndPepper(int nbPoint);
+        void CornerDetection();
 // Convolution
         //Image2D & operator*(const Image2D& p2);
         Image2D & operator= (const Image2D & p2);

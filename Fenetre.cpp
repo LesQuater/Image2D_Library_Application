@@ -1,7 +1,7 @@
 #include "Fenetre.hpp"
 #include "Image2D.h"
 
-Fenetre::Fenetre() :menuItemSeuillage("Seuillage"),menuItemConversion("Conversion"),menuFiltrageAuto("Filtrage Auto"), menuAutor("Auteur"),menuItemInfo("Information",true),menuHisto("Histogramme"),menuInfoImage("Information Image"), DialogueGrey("Seuillage Gris", *this), menuMask("Masquage"),menuTranslate("Translation"),menuRotate("Rotation"),menuItemFichier("_Fichier",true),menuNouveau(Gtk::Stock::NEW),menuOuvrir(Gtk::Stock::OPEN),menuQuitter(Gtk::Stock::QUIT),menuItemTransformation("Transformation",true),menuRGB2Grey("RGB to Grey"),menuGrey2RGB("Grey to RGB"),menuSeuilGrey("Seuillage Grey"), menuSeuilR("Seuillage Rouge"), menuSeuilG("Seuillage Vert"),menuSeuilB("Seuillage Bleu"),menuItemFiltrage("Filtrage & Bruit",true),menuSaltAndPepper("Salt & Pepper"), menuConv("Convolution"),bouton("Ok")  {
+Fenetre::Fenetre() :menuItemSeuillage("Seuillage"),menuItemConversion("Conversion"),menuFiltrageAuto("Filtrage Auto"), menuAutor("Auteur"),menuItemInfo("Information",true),menuHisto("Histogramme"),menuInfoImage("Information Image"), DialogueGrey("Seuillage Gris", *this), menuMask("Masquage"),menuTranslate("Translation"),menuRotate("Rotation"),menuItemFichier("_Fichier",true),menuNouveau(Gtk::Stock::NEW),menuOuvrir(Gtk::Stock::OPEN),menuQuitter(Gtk::Stock::QUIT),menuItemTransformation("Transformation",true),menuRGB2Grey("RGB to Grey"),menuGrey2RGB("Grey to RGB"),menuSeuilGrey("Seuillage Grey"), menuSeuilR("Seuillage Rouge"), menuSeuilG("Seuillage Vert"),menuSeuilB("Seuillage Bleu"),menuItemFiltrage("Filtrage & Bruit",true),menuSaltAndPepper("Salt & Pepper"), menuConv("Convolution"),bouton("Ok"),menuItemDetection("Detection",true),menuHarris("Harris Corner Detection")  {
     //Configurer la fenêtre.
     set_position(Gtk::WIN_POS_CENTER);
     set_default_size(800, 600);
@@ -54,6 +54,10 @@ Fenetre::Fenetre() :menuItemSeuillage("Seuillage"),menuItemConversion("Conversio
     menuFiltrage.append(menuMask);
     menuFiltrage.append(menuFiltrageAuto);
 
+    barreMenu.append(menuItemDetection);
+    menuItemDetection.set_submenu(menuDetection);
+    menuDetection.append(menuHarris);
+
     barreMenu.append(menuItemInfo);
     menuItemInfo.set_submenu(menuInfo);
     menuInfo.append(menuHisto);
@@ -75,6 +79,7 @@ Fenetre::Fenetre() :menuItemSeuillage("Seuillage"),menuItemConversion("Conversio
     menuTranslate.signal_activate().connect(sigc::mem_fun(*this, &Fenetre::Translate));
     menuMask.signal_activate().connect(sigc::mem_fun(*this, &Fenetre::Mask));
     menuFiltrageAuto.signal_activate().connect(sigc::mem_fun(*this, &Fenetre::FiltrageAuto));
+    menuHarris.signal_activate().connect(sigc::mem_fun(*this, &Fenetre::Harris));
     menuHisto.signal_activate().connect(sigc::mem_fun(*this, &Fenetre::Histo));
     menuInfoImage.signal_activate().connect(sigc::mem_fun(*this, &Fenetre::Info));
     menuAutor.signal_activate().connect(sigc::mem_fun(*this, &Fenetre::Autor));
@@ -411,12 +416,19 @@ void Fenetre::RealFiltrageAuto(){
       image.set("A_FiltrageAuto.bmp");
   }
 }
+void Fenetre::Harris(){
+  A.CornerDetection();
+  A.createBMP("A_Harris.bmp");
+  image.set("A_Harris.bmp");
+  //bouton.signal_clicked().connect();
+}
 void Fenetre::Histo(){
   A.histogramme();
   A.print_histogramme();
   image.set("histo.bmp");
   //bouton.signal_clicked().connect();
 }
+
 void Fenetre::Info(){
   std::string info = "Taille : "+std::to_string(A.get_nbX())+"x"+std::to_string(A.get_nbY())+" pixels\n Option : "+A.get_option()+"\n Chemin : "+A.get_path()+"\n";
   txt.set_label(info);
